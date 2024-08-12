@@ -3,12 +3,9 @@ import requests # リクエストするための機能をインポート
 from datetime import datetime # 現在時刻などの時間を扱う機能をインポート
 import pandas as pd # データフレームを扱う機能をインポート
 import matplotlib.pyplot as plt
-from matplotlib import rcParams
+import matplotlib_fontja
 import numpy as np
 
-# 日本語フォントの設定
-rcParams['font.family'] = 'sans-serif'
-rcParams['font.sans-serif'] = ['Hiragino Maru Gothic Pro', 'Yu Gothic', 'Meirio', 'Takao', 'IPAexGothic', 'IPAPGothic', 'Noto Sans CJK JP']
 
 # 選択肢を作成
 city_code_list = {

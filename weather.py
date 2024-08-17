@@ -46,9 +46,17 @@ else:
 weather_now_text = "現在の降水確率 : " + weather_now
 st.write(weather_now_text) # 現在時刻の降水確率を表示
 
-temp_now = float(weather_json['forecasts'][0]['temperature']['max']['celsius'])
-temp_old = float(weather_json['forecasts'][-1]['temperature']['max']['celsius'])
-st.metric(label="今日の最高気温", value= f"{temp_now}℃", delta=f"{temp_now - temp_old}℃")
+# temp_now の None チェックと代替値設定
+temp_now_raw = weather_json['forecasts'][0]['temperature']['max']['celsius']
+temp_now = float(temp_now_raw) if temp_now_raw is not None else 0.0
+
+# temp_old の None チェックと代替値設定
+temp_old_raw = weather_json['forecasts'][-1]['temperature']['max']['celsius']
+temp_old = float(temp_old_raw) if temp_old_raw is not None else 0.0
+
+# メトリック表示
+st.metric(label="今日の最高気温", value=f"{temp_now}℃", delta=f"{temp_now - temp_old}℃")
+
 
 
 # 今日、明日、明後日の降水確率をDadaFrameに代入

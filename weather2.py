@@ -5,7 +5,11 @@ import pandas as pd # データフレームを扱う機能をインポート
 import matplotlib.pyplot as plt
 import matplotlib_fontja
 import numpy as np
+from openai import OpenAI # openAIのchatGPTのAIを活用するための機能をインポート
 
+# アクセスの為のキーをos.environ["OPENAI_API_KEY"]に代入し、設定
+
+import os # OSが持つ環境変数OPENAI_API_KEYにAPIを入力するためにosにアクセスするためのライブラリをインポート
 
 # 選択肢を作成
 city_code_list = {
@@ -72,9 +76,17 @@ df3 = pd.DataFrame(weather_json['forecasts'][2]['chanceOfRain'],index=["明後�
 df = pd.concat([df1,df2,df3]) # 今日、明日、明後日の降水確率を結合して一覧にしてdfに代入
 st.dataframe(df) # 一覧にした降水確率を表示
 
-temp_now = float(weather_json['forecasts'][0]['temperature']['max']['celsius'])
-temp_old = float(weather_json['forecasts'][-1]['temperature']['max']['celsius'])
-st.metric(label="今日の最高気温", value= f"{temp_now}℃", delta=f"{temp_now - temp_old}℃")
+# temp_now の None チェックと代替値設定
+temp_now_raw = weather_json['forecasts'][0]['temperature']['max']['celsius']
+temp_now = float(temp_now_raw) if temp_now_raw is not None else 0.0
+
+# temp_old の None チェックと代替値設定
+temp_old_raw = weather_json['forecasts'][-1]['temperature']['max']['celsius']
+temp_old = float(temp_old_raw) if temp_old_raw is not None else 0.0
+
+# メトリック表示
+st.metric(label="今日の最高気温", value=f"{temp_now}℃", delta=f"{temp_now - temp_old}℃")
+
 
 df = pd.concat([df1, df2, df3])
 df = df.replace({"--%": np.nan})  # "--%"をNaNに置き換え
@@ -94,11 +106,7 @@ ax.set_ylim(0, 100)  # y軸を0から100に設定
 st.pyplot(fig)
 
 
-from openai import OpenAI # openAIのchatGPTのAIを活用するための機能をインポート
 
-# アクセスの為のキーをos.environ["OPENAI_API_KEY"]に代入し、設定
-
-import os # OSが持つ環境変数OPENAI_API_KEYにAPIを入力するためにosにアクセスするためのライブラリをインポート
 # ここにご自身のAPIキーを入力してください！
 api_key = os.getenv('OPENAI_API_KEY')
 
@@ -115,8 +123,8 @@ content_kind_of =[
 # chatGPTにリクエストするためのメソッドを設定。引数には書いてほしい内容と文章のテイストと最大文字数を指定
 def run_gpt(content_kind_of_to_gpt,content_maxStr_to_gpt):
     # リクエスト内容を決める
-    request_to_gpt = city_code_index + " の地域の過去5年間の気象データを分析して、2024年8月下旬の天気を予測してください。内容は"+ content_maxStr_to_gpt + "文字以内で出力してください。" + "また、文章は" + content_kind_of_to_gpt + "にしてください。"
-    
+    request_to_gpt = city_code_index + " の地域の過去5年間の気象データを分析して、2024年8月の天気を予測してください。内容は"+ content_maxStr_to_gpt + "文字以内で出力してください。" + "また、文章は" + content_kind_of_to_gpt + "にしてください。"
+
     # 決めた内容を元にclient.chat.completions.createでchatGPTにリクエスト。オプションとしてmodelにAIモデル、messagesに内容を指定
     response = client.chat.completions.create(
         model="gpt-4o-mini",
@@ -133,7 +141,7 @@ st.sidebar.title('ChatGPT 月間天気予報')# タイトル
 
 # 書かせたい内容
 # content_text_to_gpt = st.sidebar.text_input("書かせたい内容を入力してください！")
-            
+
 # 書かせたい内容のテイストを選択肢として表示する
 content_kind_of_to_gpt = st.sidebar.selectbox("文章の種類",options=content_kind_of)
 

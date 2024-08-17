@@ -88,3 +88,4 @@ ax.legend(title="日付")
 ax.set_ylim(0, 100)  # y軸を0から100に設定
 
 st.pyplot(fig)
+
